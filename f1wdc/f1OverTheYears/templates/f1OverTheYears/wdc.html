@@ -1,0 +1,186 @@
+{%load static%}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Drivers Championship</title>
+    <link href="{%static "f1OverTheYears/css/bootstrap.min.css"%}" rel="stylesheet">
+    <script>
+        var year = {{request.session.year}};
+        var first_held = {{request.session.first_held}}
+        var last_held = {{request.session.last_held}}
+        var csrfToken = document.cookie.split(";").filter((data)=>{
+            return (data.indexOf('csrftoken='))>-1
+        })[0].split('csrftoken=')[1];
+
+        function loadData(lbl) {
+            var yearSelection = document.getElementById("yearSelection");
+            for (i=parseInt(first_held);i<parseInt(last_held);i++) {
+                var optionItem = document.createElement("option");
+                optionItem.value=i;
+                optionItem.id=i;
+                optionItem.innerText=i;
+                yearSelection.appendChild(optionItem);
+            }
+
+            var results = document.getElementById('results');
+            results.innerText="";
+            while(results.hasChildNodes()) {
+                results.removeChild(results.lastChild);
+            }
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "{%url 'f1_data'%}");
+            xhr.setRequestHeader("X-CSRFToken", csrfToken)
+            if(lbl==="next" || lbl==="prev") {
+                xhr.setRequestHeader("lbl", lbl);
+            } else {
+                xhr.setRequestHeader("lbl", "");
+            }
+
+                xhr.onreadystatechange = function() {
+                    if(xhr.readyState === 4 && xhr.status==200) {
+                        if (xhr.response=={}) {
+                            results.innerText="No Data";
+                            return;
+                        }
+                        var response = JSON.parse(xhr.response);
+                        for(data in response) {
+                            
+                            var parent = document.createElement('div');
+                            var superparent = document.createElement('div');
+                            superparent.className = "card";
+                            superparent.id = "superparent";
+                            parent.className = "row card-body";
+                            parent.id  = "parent";
+
+                            var driver_name = document.createElement('div');
+                            var manufacturer = document.createElement('div');
+                            var year = document.createElement('div');
+                            var position = document.createElement('div');
+                            var country = document.createElement('div');
+                            var points = document.createElement('div');
+
+                            driver_name.className = "col-md-2";
+                            driver_name.innerText = response[data][0];
+                            
+                            position.className = "col-md-2";
+                            position.innerText = data;
+
+                            country.className = "col-md-3";
+                            country.innerText = response[data][3];
+
+                            points.className = "col-md-2";
+                            points.innerText = response[data][4];
+
+                            manufacturer.className = "col-md-3";
+                            manufacturer.innerText = response[data][1];
+
+                            parent.appendChild(driver_name);
+                            parent.appendChild(position);
+                            parent.appendChild(country);
+                            parent.appendChild(points);
+                            parent.appendChild(manufacturer);
+
+                            superparent.appendChild(parent);
+                            results.appendChild(superparent);
+
+                            document.getElementById('main_heading').innerText = response[data][2]+" F1 World Championship";
+                            yearSelection.value=response[data][2];
+                            if(response[data][2] == new Date().getFullYear()-1) {
+                                document.getElementById('next').style.display = "none";
+                            } else {
+                                document.getElementById('next').style.display = "block";
+                            }
+                            if(response[data][2]==first_held) {
+                                document.getElementById('prev').style.display = "none";
+                            } else {
+                                document.getElementById('prev').style.display = "block";
+                            }
+                        }
+                    }
+                }
+                xhr.send();
+        }
+
+        function requestBasedOnYear(selectedYear) {
+            console.log(selectedYear);
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "{%url 'index'%}");
+            xhr.setRequestHeader("X-CSRFToken", csrfToken);
+            xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+            xhr.onreadystatechange = function() {
+                if(xhr.readyState === 4 && xhr.status==200) {
+                    year = selectedYear;
+                    loadData();
+                }
+            }
+            xhr.send("year="+selectedYear+"&redirectPage=true");
+        }
+    </script>
+    <style>
+        .nav-link {
+            font-size:25px;
+            font-weight:bold;
+            text-shadow:2px 2px 2px gray;
+            color:black;
+        }
+        .container {
+            background-color:red;
+            opacity:0.7;
+            box-shadow:1px 1px 2px 4px cyan;
+        }
+        .card:hover {
+            box-shadow:0.8px 1px 2px 1px yellow;
+            opacity:0.85;
+        }
+        h1 {
+            text-shadow:2px 1px 8px maroon;
+            margin:20px;
+        }
+        body {
+            background-color: linen;
+        }
+        .header {
+            background-color:firebrick;
+            text-shadow:2px 1px 8px lightsteelblue;
+            font-weight:bold;
+            color:floralwhite;
+        }
+    </style>
+</head>
+<body onload="loadData();">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light justify-content-center">
+        <ul class="nav">
+            <li class="nav-item">
+                <a class="nav-link" href="/f1OverTheYears/">Home</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" id="prev" onclick="loadData('prev')">Prev</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" id="next" onclick="loadData('next')">Next</a>
+            </li>
+            <li class="nav-item">
+                <select id="yearSelection" class="nav-link" onchange="requestBasedOnYear(this.value)"></select>
+            </li>
+        </ul>
+    </nav>
+
+    <h1 class="text-center" id="main_heading"></h1>
+
+    <div class="jumbotron container">
+            <div class="card header">
+                    <div class="row card-body">
+                        <div class="col-md-2">Driver</div>
+                        <div class="col-md-2">Position</div>
+                        <div class="col-md-3">Nationality</div>
+                        <div class="col-md-2">Points</div>
+                        <div class="col-md-3">Manufacturer</div>
+                    </div>
+                </div>
+        <div id="results"></div>
+    </div>
+</body>
+</html>

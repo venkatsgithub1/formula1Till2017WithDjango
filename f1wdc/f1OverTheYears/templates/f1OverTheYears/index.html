@@ -1,0 +1,48 @@
+{%load static%}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Welcome</title>
+    <link href="{%static "f1OverTheYears/css/bootstrap.min.css"%}" rel="stylesheet">
+    <script>
+        function checkYear() {
+            var year = document.getElementById("year");
+            if (parseInt(year.value)<1950 || parseInt(year.value)>new Date().getFullYear()-1)  {
+                alert("Invalid year! Enter a year between 1950 and current year-1 as current year is in progress.");
+                return false;    
+            }
+            return true;
+        }
+    </script>
+    <style>
+        .container {
+            padding:30px;
+            background-color:orangered;
+            width:500px;
+            height:100px;
+        }
+        h1 {
+            font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <h1 class="text-center">Formula One World Driver's Championship</h1>
+    <div class="jumbotron container text-center">
+        <form method="POST" action="{%url 'index'%}">
+            {%csrf_token%}
+            <div class="row">
+                <div class="col-sm-7 text-right">
+                    {{form.year}}
+                </div>
+                <div class="col-sm-1">
+                    <button type="submit" onclick="return checkYear();">Search</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</body>
+</html>
