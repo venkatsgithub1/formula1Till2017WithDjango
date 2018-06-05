@@ -11,4 +11,5 @@ CSS: Bootstrap.
 Javascript: Vanilla.
 Database: Sqlite.
 
-<a href="https://github.com/venkatsgithub1/formula1Till2017WithDjango/blob/master/images_md/site_main_page.png"></a>
+<h3>Main page:</h3>
+<img src="https://github.com/venkatsgithub1/formula1Till2017WithDjango/blob/master/images_md/site_main_page.png"/>
