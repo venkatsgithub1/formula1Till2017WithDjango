@@ -1,4 +1,4 @@
-# formula1Till2017WithDjango
+# Formula 1 World Drivers Championships Till 2017 With Django.
 Formula 1 World Drivers Championship Data till 2017 using Django.
 
 This is a Django project with Sqlite as backend.
